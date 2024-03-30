@@ -1,27 +1,41 @@
 from collections import UserDict
 
-def input_error(func):
-    """
-    Декоратор для обробки помилок введення користувача.
-    Обробляє винятки KeyError, ValueError, IndexError.
-    """
-    def wrapper(*args, **kwargs):
-        try:
-            return func(*args, **kwargs)
-        except (KeyError, ValueError, IndexError) as e:
-            print(f"Error: {e}")
-            return None
-    return wrapper
+class AddressBook(UserDict):
+    def __init__(self):
+        super().__init__()
 
-def parse_input(command):
-    """
-    Функція для розбору введеної команди.
-    """
-    parts = command.split()
-    if len(parts) < 1:
-        return None, []
-    return parts[0].lower(), parts[1:]
+    def add_contact(self, record):
+        self.data[record.name.value] = record
 
+    def remove_contact(self, name):
+        if name in self.data:
+            del self.data[name]
+    
+    def change_contact_name(self, name):
+        if name in self.data:
+            record = self.data.pop(name)
+            new_name = input("Enter new name for the contact: ")
+            record.name.value = new_name
+            self.data[new_name] = record
+
+    def change_contact_phone(self, name):
+        if name in self.data:
+            record = self.data[name]
+            old_phone_number = input("Enter the old phone number: ")
+            new_phone_number = input("Enter the new phone number: ")
+            record.edit_phone(old_phone_number, new_phone_number)
+            print("Phone number changed.")
+
+    def show_phone(self, name):
+        if name in self.data:
+            print(self.data[name])
+
+    def get_contact(self, name):
+        return self.data.get(name)
+
+    def get_all_contacts(self):
+        return self.data.values()
+    
 # Клас, що представляє базове поле (значення)
 class Field:
     def __init__(self, value):
@@ -75,41 +89,20 @@ class Record:
         # Перевизначений метод для зручного виводу інформації про запис
         return f"Contact name: {self.name.value}, phones: {'; '.join(str(p) for p in self.phones)}"
 
-class AddressBook(UserDict):
-    def __init__(self):
-        super().__init__()
-
-    def add_contact(self, record):
-        self.data[record.name.value] = record
-
-    def remove_contact(self, name):
-        if name in self.data:
-            del self.data[name]
     
-    def change_contact_name(self, name):
-        if name in self.data:
-            record = self.data.pop(name)
-            new_name = input("Enter new name for the contact: ")
-            record.name.value = new_name
-            self.data[new_name] = record
 
-    def change_contact_phone(self, name):
-        if name in self.data:
-            record = self.data[name]
-            old_phone_number = input("Enter the old phone number: ")
-            new_phone_number = input("Enter the new phone number: ")
-            record.edit_phone(old_phone_number, new_phone_number)
-            print("Phone number changed.")
-
-    def show_phone(self, name):
-        if name in self.data:
-            print(self.data[name])
-
-    def get_contact(self, name):
-        return self.data.get(name)
-
-    def get_all_contacts(self):
-        return self.data.values()
+def input_error(func):
+    """
+    Декоратор для обробки помилок введення користувача.
+    Обробляє винятки KeyError, ValueError, IndexError.
+    """
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except (KeyError, ValueError, IndexError) as e:
+            print(f"Error: {e}")
+            return None
+    return wrapper    
 
 @input_error
 # Функція для додавання контакту
@@ -153,6 +146,17 @@ def show_all_contacts(address_book):
     print("All contacts:")
     for record in address_book.get_all_contacts():
         print(record)
+
+
+def parse_input(command):
+    """
+    Функція для розбору введеної команди.
+    """
+    parts = command.split()
+    if len(parts) < 1:
+        return None, []
+    return parts[0].lower(), parts[1:]
+
 
 def main():
     print("Welcome to the assistant bot!")
